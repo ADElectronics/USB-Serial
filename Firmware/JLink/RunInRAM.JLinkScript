@@ -1,0 +1,12 @@
+r
+h
+loadbin build\Firmware_RAM.bin, 0x20000000
+//verifybin build\Firmware_RAM.bin, 0x20000000
+
+wreg "R15 (PC)" 0x20000000
+// 0x20010000 - 4 0x2000FFFC
+wreg "R13 (SP)" 0x2000FFFC
+wreg "FAULTMASK" 0x00000000
+
+g
+q

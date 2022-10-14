@@ -1,0 +1,17 @@
+{
+   "version": "0.2.0",
+   "configurations": [
+      {
+         "name": "Cortex Debug",
+         "cwd": "${workspaceRoot}",
+         "executable": "./build/firmware.elf",
+         "svdFile": "./JLink/SVD/STM32F0xx.svd",
+         "request": "launch",
+         "type": "cortex-debug",
+         "servertype": "jlink",
+         "device": "STM32F070F6",
+         "interface": "swd",
+         "runToEntryPoint": "main"
+      }
+   ]
+}

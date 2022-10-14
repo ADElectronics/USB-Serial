@@ -1,0 +1,33 @@
+{
+   "env":
+   {
+      "ARM_GCC_TOOLCHAIN": "C:/Data/GCC/xpack-arm-none-eabi-gcc"
+   },
+   "configurations": [
+      {
+         "name": "ARM",
+         "compilerPath": "${env.ARM_GCC_TOOLCHAIN}/bin/arm-none-eabi-gcc.exe",
+         "includePath": [
+            "${env.ARM_GCC_TOOLCHAIN}/arm-none-eabi/include/**",
+            "${env.ARM_GCC_TOOLCHAIN}/arm-none-eabi/include/sys/**",
+            "${env.ARM_GCC_TOOLCHAIN}/lib/**",
+            "${workspaceRoot}/Drivers/**",
+            "${workspaceRoot}/Middlewares/**",
+            "${workspaceRoot}/Src/**",
+            "${workspaceRoot}/DriversExt/**",
+            "${workspaceRoot}/Inc/**"
+         ],
+         "defines": [
+            "STM32F070x6",
+            "HSE_VALUE=8000000U",
+            "USE_FULL_LL_DRIVER",
+            "USE_HAL_DRIVER",
+            "GCC_ARMCM4"
+         ],
+         "cStandard": "c11",
+         "cppStandard": "c++17",
+         "intelliSenseMode": "windows-gcc-arm"
+      }
+   ],
+   "version": 4
+}

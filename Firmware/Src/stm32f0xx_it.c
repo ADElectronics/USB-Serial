@@ -22,6 +22,7 @@
 #include "stm32f0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -139,6 +140,23 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f0xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles USART2 global interrupt.
+  */
+void USART2_IRQHandler(void)
+{
+   /* USER CODE BEGIN USART2_IRQn 0 */
+   if (LL_USART_IsActiveFlag_RXNE(USART2))
+   {
+      uint8_t data = LL_USART_ReceiveData8(USART2);
+      CDC_Transmit_FS(&data, 1);
+   }
+   /* USER CODE END USART2_IRQn 0 */
+   /* USER CODE BEGIN USART2_IRQn 1 */
+
+   /* USER CODE END USART2_IRQn 1 */
+}
 
 /**
   * @brief This function handles USB global Interrupt / USB wake-up interrupt through EXTI line 18.

@@ -1,0 +1,28 @@
+{
+   "files.associations": {
+      "systemview_init.h": "c",
+      "sysview_init.h": "c",
+      "main.h": "c",
+      "apds9960.h": "c",
+      "freemaster_init.h": "c",
+      "freemaster_vars_map.h": "c",
+      "bootloader.h": "c",
+      "array": "c",
+      "string_view": "c",
+      "initializer_list": "c",
+      "ranges": "c",
+      "utility": "c",
+      "stm32f4xx_ll_gpio.h": "c",
+      "stm32f4xx_ll_system.h": "c",
+      "stm32f4xx.h": "c",
+      "stm32f401xc.h": "c",
+      "target_flash.h": "c",
+      "stm32f4_spi_ll_impl.h": "c",
+      "stm32g4_spi_ll_impl.h": "c",
+      "stm32xx_flash_impl.h": "c",
+      "stm32xx_i2c_impl.h": "c",
+      "stm32f4_flash_ll_impl.h": "c",
+      "usb_device.h": "c"
+   },
+   "cortex-debug.variableUseNaturalFormat": false
+}

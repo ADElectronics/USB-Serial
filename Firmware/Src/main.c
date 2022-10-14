@@ -55,7 +55,47 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+typedef enum
+{
+   INTRF_USART = 0,
+   INTRF_RS485 = 1,
+   INTRF_RS422 = 2,
+   INTRF_RS232 = 3
+} interface_t;
 
+void SetInterface(interface_t i)
+{
+   switch (i)
+   {
+      case INTRF_RS485:
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_0);
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_7);
+         LL_GPIO_SetOutputPin(GPIOB, GPIO_PIN_1);
+         LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_4);
+         break;
+
+      case INTRF_RS422:
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_4);
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_7);
+         LL_GPIO_SetOutputPin(GPIOB, GPIO_PIN_1);
+         LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_0);
+         break;
+
+      case INTRF_RS232:
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_0);
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_4);
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_7);
+         LL_GPIO_ResetOutputPin(GPIOB, GPIO_PIN_1);
+         break;
+
+      default: // INTRF_USART
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_0);
+         LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_4);
+         LL_GPIO_SetOutputPin(GPIOB, GPIO_PIN_1);
+         LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_7);
+         break;
+   }
+}
 /* USER CODE END 0 */
 
 /**
@@ -65,7 +105,7 @@ static void MX_USART2_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+   interface_t current_int = INTRF_USART;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -89,17 +129,37 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-
+   SetInterface(current_int);
+   LL_USART_EnableIT_RXNE(USART2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+   for (;;)
+   {
+      if (LL_GPIO_IsInputPinSet(GPIOA, GPIO_PIN_6) == 0x00)
+      {
+         uint32_t count = 0;
+         while (LL_GPIO_IsInputPinSet(GPIOA, GPIO_PIN_6) == 0x00)
+         {
+            HAL_Delay(1);
+            count += 1;
+         }
+
+         if (count > 50)
+         {
+            current_int += 1;
+            if (current_int > INTRF_RS232)
+               current_int = INTRF_USART;
+            SetInterface(current_int);
+            HAL_Delay(200);
+         }
+      }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+   }
   /* USER CODE END 3 */
 }
 
@@ -197,6 +257,10 @@ static void MX_USART2_UART_Init(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* USART2 interrupt Init */
+  NVIC_SetPriority(USART2_IRQn, 0);
+  NVIC_EnableIRQ(USART2_IRQn);
+
   /* USER CODE BEGIN USART2_Init 1 */
 
   /* USER CODE END USART2_Init 1 */
@@ -235,10 +299,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_7, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_4|GPIO_PIN_7, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
 
   /*Configure GPIO pins : PA0 PA4 PA5 PA7 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_7;

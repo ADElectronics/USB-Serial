@@ -1,0 +1,6 @@
+r
+h
+savebin build\Firmware_R.bin, 0x00, 0x4000
+r
+g
+q
