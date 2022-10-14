@@ -155,11 +155,11 @@ DocumentUniqueId=PNQGDOKF
 
 [Parameter1]
 Name=PCB_Week
-Value=2234
+Value=2241
 
 [Parameter2]
 Name=GlobalProjectRevision
-Value=1.0
+Value=1.1
 
 [Parameter3]
 Name=GlobalProjectNumber

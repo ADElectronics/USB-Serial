@@ -72,6 +72,7 @@ void SetInterface(interface_t i)
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_7);
          LL_GPIO_SetOutputPin(GPIOB, GPIO_PIN_1);
          LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_4);
+         LL_GPIO_SetPinMode(GPIOA, GPIO_PIN_1, LL_GPIO_MODE_ALTERNATE);
          break;
 
       case INTRF_RS422:
@@ -79,6 +80,8 @@ void SetInterface(interface_t i)
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_7);
          LL_GPIO_SetOutputPin(GPIOB, GPIO_PIN_1);
          LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_0);
+         LL_GPIO_SetPinMode(GPIOA, GPIO_PIN_1, LL_GPIO_MODE_OUTPUT);
+         LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_1);
          break;
 
       case INTRF_RS232:
@@ -86,6 +89,8 @@ void SetInterface(interface_t i)
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_4);
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_7);
          LL_GPIO_ResetOutputPin(GPIOB, GPIO_PIN_1);
+         LL_GPIO_SetPinMode(GPIOA, GPIO_PIN_1, LL_GPIO_MODE_OUTPUT);
+         LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_1);
          break;
 
       default: // INTRF_USART
@@ -93,6 +98,8 @@ void SetInterface(interface_t i)
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_4);
          LL_GPIO_SetOutputPin(GPIOB, GPIO_PIN_1);
          LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_7);
+         LL_GPIO_SetPinMode(GPIOA, GPIO_PIN_1, LL_GPIO_MODE_OUTPUT);
+         LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_1);
          break;
    }
 }
