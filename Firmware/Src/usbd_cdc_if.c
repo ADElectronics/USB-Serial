@@ -229,7 +229,43 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
       linecoding.paritytype = pbuf[5];
       linecoding.datatype = pbuf[6];
 
-      LL_USART_SetBaudRate(USART2, SystemCoreClock, LL_USART_OVERSAMPLING_16, linecoding.bitrate);
+      if(linecoding.bitrate < 9600) // 9600 ...
+         linecoding.bitrate = 9600;
+      else if(linecoding.bitrate > 1000000) // ... 1000000
+         linecoding.bitrate = 1000000;
+
+      if(linecoding.paritytype > 2) // Mark, Space not supported
+         linecoding.paritytype = 0;
+
+      if(linecoding.format == 1) // 1.5 Stop bits not supported
+         linecoding.format = 0;
+
+      if(linecoding.datatype < 7 || linecoding.datatype > 8) // only 7\8 bits supported
+         linecoding.datatype = 8;
+
+      while (LL_USART_IsActiveFlag_BUSY(USART2) == 1) ;
+      LL_USART_Disable(USART2);
+
+      LL_USART_SetBaudRate(USART2, SystemCoreClock, LL_USART_OVERSAMPLING_8, linecoding.bitrate);
+
+      if(linecoding.paritytype == 2)
+         LL_USART_SetParity(USART2, LL_USART_PARITY_EVEN);
+      else if(linecoding.paritytype == 1)
+         LL_USART_SetParity(USART2, LL_USART_PARITY_ODD);
+      else // default
+         LL_USART_SetParity(USART2, LL_USART_PARITY_NONE);
+
+      if(linecoding.format == 2)
+         LL_USART_SetStopBitsLength(USART2, LL_USART_STOPBITS_2);
+      else // default
+         LL_USART_SetStopBitsLength(USART2, LL_USART_STOPBITS_1);
+
+      if(linecoding.datatype == 7)
+         LL_USART_SetDataWidth(USART2, LL_USART_DATAWIDTH_7B);
+      else // default
+         LL_USART_SetDataWidth(USART2, LL_USART_DATAWIDTH_8B);
+
+      LL_USART_Enable(USART2);
       break;
 
       case CDC_GET_LINE_CODING:
@@ -276,10 +312,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-   for(uint32_t i = 0; i < *Len; i++)
-   {
-      LL_USART_TransmitData8(USART2, Buf[i]);
-   }
+   NewDataTransmit(Buf, *Len);
    USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
    USBD_CDC_ReceivePacket(&hUsbDeviceFS);
    return (USBD_OK);
@@ -301,12 +334,14 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 {
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->TxState != 0){
-    return USBD_BUSY;
-  }
-  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
-  result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
+   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
+   if (hcdc->TxState != 0)
+   {
+      return USBD_BUSY;
+   }
+
+   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
+   result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
   /* USER CODE END 7 */
   return result;
 }

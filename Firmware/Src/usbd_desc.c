@@ -62,11 +62,11 @@
   * @{
   */
 
-#define USBD_VID     1155
+#define USBD_VID     0x483
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "A_D Electronics"
-#define USBD_PID_FS     22336
-#define USBD_PRODUCT_STRING_FS     "Virtual COM Port"
+#define USBD_PID_FS     0x5740
+#define USBD_PRODUCT_STRING_FS     "VCP"
 #define USBD_CONFIGURATION_STRING_FS     "CDC Config"
 #define USBD_INTERFACE_STRING_FS     "CDC Interface"
 
@@ -336,7 +336,9 @@ uint8_t * USBD_FS_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *leng
   */
 static void Get_SerialNum(void)
 {
-  uint32_t deviceserial0, deviceserial1, deviceserial2;
+  uint32_t deviceserial0;
+  uint32_t deviceserial1;
+  uint32_t deviceserial2;
 
   deviceserial0 = *(uint32_t *) DEVICE_ID1;
   deviceserial1 = *(uint32_t *) DEVICE_ID2;

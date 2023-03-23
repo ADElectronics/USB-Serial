@@ -1,20 +1,5 @@
 /* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -22,7 +7,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +33,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -62,6 +48,42 @@ typedef enum
    INTRF_RS422 = 2,
    INTRF_RS232 = 3
 } interface_t;
+
+
+static interface_t current_int = INTRF_USART;
+//static uint8_t buf_tx[UART_BUF_LEN];
+static uint8_t buf_rx[UART_BUF_LEN];
+
+void NewDataReceived()
+{
+   static uint32_t position_pr = 0;
+   static uint32_t position_dma = 0;
+   position_dma = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_5);
+   uint32_t position = UART_BUF_LEN - position_dma;
+   static uint32_t data_len = 0x00;
+
+   if (position < position_pr)
+   {
+      data_len = (UART_BUF_LEN - position_pr) + position;
+   }
+   else
+   {
+      data_len = position - position_pr;
+   }
+
+   if (data_len > 0 && data_len < UART_BUF_LEN)
+   {
+      CDC_Transmit_FS(&buf_rx[0], data_len);
+      LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, 0);
+   }
+}
+
+void NewDataTransmit(uint8_t *data, uint32_t len)
+{
+   LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_4, (uint32_t)data);
+   LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, len);
+   LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
+}
 
 void SetInterface(interface_t i)
 {
@@ -103,6 +125,7 @@ void SetInterface(interface_t i)
          break;
    }
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -112,7 +135,7 @@ void SetInterface(interface_t i)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-   interface_t current_int = INTRF_USART;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -133,11 +156,28 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
    SetInterface(current_int);
-   LL_USART_EnableIT_RXNE(USART2);
+
+   // RX
+   LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_5, (uint32_t)&(USART2->RDR), (uint32_t)&buf_rx, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+   LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, UART_BUF_LEN);
+   LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
+
+   // TX
+   //LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4, (uint32_t)&buf_rx, (uint32_t)&USART2->TDR, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+   LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_4, (uint32_t)&USART2->TDR);
+   LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_4);
+   //LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
+
+   LL_USART_EnableDMAReq_RX(USART2);
+   LL_USART_EnableDMAReq_TX(USART2);
+   //LL_USART_EnableIT_RXNE(USART2);
+   LL_USART_EnableIT_IDLE(USART2);
+   LL_USART_Enable(USART2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -157,12 +197,14 @@ int main(void)
          {
             current_int += 1;
             if (current_int > INTRF_RS232)
+            {
                current_int = INTRF_USART;
+            }
+
             SetInterface(current_int);
             HAL_Delay(200);
          }
       }
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -264,6 +306,38 @@ static void MX_USART2_UART_Init(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* USART2 DMA Init */
+
+  /* USART2_RX Init */
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PRIORITY_HIGH);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MDATAALIGN_BYTE);
+
+  /* USART2_TX Init */
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_4, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PRIORITY_HIGH);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MDATAALIGN_BYTE);
+
   /* USART2 interrupt Init */
   NVIC_SetPriority(USART2_IRQn, 0);
   NVIC_EnableIRQ(USART2_IRQn);
@@ -277,17 +351,35 @@ static void MX_USART2_UART_Init(void)
   USART_InitStruct.Parity = LL_USART_PARITY_NONE;
   USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
   USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-  USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+  USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_8;
   LL_USART_Init(USART2, &USART_InitStruct);
   LL_USART_EnableDEMode(USART2);
   LL_USART_SetDESignalPolarity(USART2, LL_USART_DE_POLARITY_HIGH);
-  LL_USART_SetDEAssertionTime(USART2, 0);
-  LL_USART_SetDEDeassertionTime(USART2, 0);
+  LL_USART_SetDEAssertionTime(USART2, 10);
+  LL_USART_SetDEDeassertionTime(USART2, 10);
+  LL_USART_DisableDMADeactOnRxErr(USART2);
   LL_USART_ConfigAsyncMode(USART2);
   LL_USART_Enable(USART2);
   /* USER CODE BEGIN USART2_Init 2 */
-
+   LL_USART_Disable(USART2);
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* Init with LL driver */
+  /* DMA controller clock enable */
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
+
+  /* DMA interrupt init */
+  /* DMA1_Channel4_5_IRQn interrupt configuration */
+  NVIC_SetPriority(DMA1_Channel4_5_IRQn, 0);
+  NVIC_EnableIRQ(DMA1_Channel4_5_IRQn);
 
 }
 
@@ -298,41 +390,73 @@ static void MX_USART2_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOF);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_4|GPIO_PIN_7, GPIO_PIN_SET);
+  /**/
+  LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_0);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+  /**/
+  LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_4);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+  /**/
+  LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_7);
 
-  /*Configure GPIO pins : PA0 PA4 PA5 PA7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_7;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  /**/
+  LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_1);
 
-  /*Configure GPIO pin : PA6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  /**/
+  LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
 
-  /*Configure GPIO pin : PB1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  /**/
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_0;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /**/
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_4;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /**/
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_5;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /**/
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_6;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /**/
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_7;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /**/
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_1;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 

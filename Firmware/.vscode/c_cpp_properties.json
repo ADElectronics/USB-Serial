@@ -14,7 +14,6 @@
             "${workspaceRoot}/Drivers/**",
             "${workspaceRoot}/Middlewares/**",
             "${workspaceRoot}/Src/**",
-            "${workspaceRoot}/DriversExt/**",
             "${workspaceRoot}/Inc/**"
          ],
          "defines": [
@@ -22,7 +21,9 @@
             "HSE_VALUE=8000000U",
             "USE_FULL_LL_DRIVER",
             "USE_HAL_DRIVER",
-            "GCC_ARMCM4"
+            "GCC_ARMCM4",
+            "CDC_FS_BINTERVAL=1",
+            "CDC_HS_BINTERVAL=1"
          ],
          "cStandard": "c11",
          "cppStandard": "c++17",

@@ -29,17 +29,16 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
+#include "stm32f0xx_ll_dma.h"
 #include "stm32f0xx_ll_usart.h"
 #include "stm32f0xx_ll_rcc.h"
+#include "stm32f0xx_ll_system.h"
+#include "stm32f0xx_ll_gpio.h"
+#include "stm32f0xx_ll_exti.h"
 #include "stm32f0xx_ll_bus.h"
 #include "stm32f0xx_ll_cortex.h"
-#include "stm32f0xx_ll_system.h"
 #include "stm32f0xx_ll_utils.h"
 #include "stm32f0xx_ll_pwr.h"
-#include "stm32f0xx_ll_gpio.h"
-#include "stm32f0xx_ll_dma.h"
-
-#include "stm32f0xx_ll_exti.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -69,8 +68,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-/* USER CODE BEGIN Private defines */
 
+/* USER CODE BEGIN Private defines */
+#define UART_BUF_LEN                         512
+
+void NewDataReceived();
+void NewDataTransmit(uint8_t *data, uint32_t len);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

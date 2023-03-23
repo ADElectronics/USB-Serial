@@ -142,15 +142,48 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 channel 4 and 5 interrupts.
+  */
+void DMA1_Channel4_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel4_5_IRQn 0 */
+   // USART TX
+   if(LL_DMA_IsActiveFlag_HT4(DMA1)) // Half Transfer
+   {
+      LL_DMA_ClearFlag_HT4(DMA1);
+   }
+
+   if(LL_DMA_IsActiveFlag_TC4(DMA1)) // Transfer Complete
+   {
+      LL_DMA_ClearFlag_TC4(DMA1);
+      LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_4);
+   }
+  /* USER CODE END DMA1_Channel4_5_IRQn 0 */
+
+  /* USER CODE BEGIN DMA1_Channel4_5_IRQn 1 */
+    // USART RX
+   if(LL_DMA_IsActiveFlag_HT5(DMA1)) // Half Transfer
+   {
+      LL_DMA_ClearFlag_HT5(DMA1);
+   }
+
+   if(LL_DMA_IsActiveFlag_TC5(DMA1)) // Transfer Complete
+   {
+      LL_DMA_ClearFlag_TC5(DMA1);
+   }
+  /* USER CODE END DMA1_Channel4_5_IRQn 1 */
+}
+
+/**
   * @brief This function handles USART2 global interrupt.
   */
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-   if (LL_USART_IsActiveFlag_RXNE(USART2))
+   if(LL_USART_IsActiveFlag_IDLE(USART2))
    {
-      uint8_t data = LL_USART_ReceiveData8(USART2);
-      CDC_Transmit_FS(&data, 1);
+      LL_USART_ClearFlag_IDLE(USART2);
+      NewDataReceived();
    }
   /* USER CODE END USART2_IRQn 0 */
   /* USER CODE BEGIN USART2_IRQn 1 */
