@@ -31,6 +31,7 @@ ReportSuppressedErrorsInMessages=0
 FSMCodingStyle=eFMSDropDownList_OneProcess
 FSMEncodingStyle=eFMSDropDownList_OneHot
 IsProjectConflictPreventionWarningsEnabled=1
+IsVirtualBomDocumentRemoved=0
 OutputPath=_Outputs
 LogFolderPath=_Logs
 ManagedProjectGUID=
@@ -134,7 +135,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=
+DocumentUniqueId=IKYBIMOB
 
 [Document6]
 DocumentPath=PCB.PcbDoc
@@ -155,11 +156,11 @@ DocumentUniqueId=PNQGDOKF
 
 [Parameter1]
 Name=PCB_Week
-Value=2241
+Value=2303
 
 [Parameter2]
 Name=GlobalProjectRevision
-Value=1.1
+Value=1.2
 
 [Parameter3]
 Name=GlobalProjectNumber
@@ -356,12 +357,42 @@ OutputName19=WireList Netlist
 OutputDocumentPath19=
 OutputVariantName19=
 OutputDefault19=0
+OutputType20=SIMetrixNetlist
+OutputName20=SIMetrix
+OutputDocumentPath20=
+OutputVariantName20=
+OutputDefault20=0
+OutputType21=SIMPLISNetlist
+OutputName21=SIMPLIS
+OutputDocumentPath21=
+OutputVariantName21=
+OutputDefault21=0
+OutputType22=XSpiceNetlist
+OutputName22=Mixed Sim Netlist
+OutputDocumentPath22=
+OutputVariantName22=
+OutputDefault22=0
 
 [OutputGroup2]
 Name=Simulator Outputs
 Description=
 TargetPrinter=Microsoft Print to PDF
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
+OutputType1=AdvSimNetlist
+OutputName1=Mixed Sim
+OutputDocumentPath1=
+OutputVariantName1=
+OutputDefault1=0
+OutputType2=SIMetrixSimulation
+OutputName2=SIMetrix
+OutputDocumentPath2=
+OutputVariantName2=
+OutputDefault2=0
+OutputType3=SIMPLISSimulation
+OutputName3=SIMPLIS
+OutputDocumentPath3=
+OutputVariantName3=
+OutputDefault3=0
 
 [OutputGroup3]
 Name=Documentation Outputs
@@ -436,6 +467,18 @@ OutputDocumentPath11=
 OutputVariantName11=
 OutputDefault11=0
 PageOptions11=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
+OutputType12=Harness Layout Drawing Print
+OutputName12=Harness Layout Drawing Prints
+OutputDocumentPath12=
+OutputVariantName12=
+OutputDefault12=0
+PageOptions12=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
+OutputType13=Harness Wiring Diagram Print
+OutputName13=Harness Wiring Diagram Prints
+OutputDocumentPath13=
+OutputVariantName13=
+OutputDefault13=0
+PageOptions13=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
 
 [OutputGroup4]
 Name=Assembly Outputs
@@ -619,6 +662,12 @@ OutputDocumentPath8=
 OutputVariantName8=[No Variations]
 OutputDefault8=0
 PageOptions8=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
+OutputType9=Project History
+OutputName9=Project History
+OutputDocumentPath9=
+OutputVariantName9=[No Variations]
+OutputDefault9=0
+PageOptions9=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
 
 [OutputGroup7]
 Name=Other Outputs
@@ -817,6 +866,16 @@ OutputName8=Specctra Design PCB
 OutputDocumentPath8=
 OutputVariantName8=
 OutputDefault8=0
+OutputType9=ExportIDF
+OutputName9=Export IDF
+OutputDocumentPath9=
+OutputVariantName9=
+OutputDefault9=0
+OutputType10=Web ReviewOutputName
+OutputName10=Web Review Data
+OutputDocumentPath10=
+OutputVariantName10=
+OutputDefault10=0
 
 [OutputGroup10]
 Name=PostProcess Outputs
@@ -949,6 +1008,7 @@ Type116=1
 Type117=1
 Type118=1
 Type119=1
+Type120=1
 
 [Difference Levels]
 Type1=1
@@ -1140,12 +1200,12 @@ Type116=2
 Type117=3
 Type118=3
 Type119=3
-MultiChannelAlternate=2
 AlternateItemFail=3
 Type122=2
 Type123=1
 Type124=1
 Type125=1
+Type127=1
 
 [ERC Connection Matrix]
 L1=NNNNNNNNNNNWNNNWW
@@ -1196,7 +1256,7 @@ ComponentLibIdentifierKind0=Library Name And Type
 ComponentLibraryIdentifier0=ADLib.DbLib/Диоды SMT - Супрессоры
 ComponentDesignItemID0=PESDUC2FD5VU
 ComponentSymbolReference0=Suppressor
-ComponentUpdate0=0
+ComponentUpdate0=1
 ComponentIsDeviceSheet0=0
 ComponentLibIdentifierKind1=Library Name And Type
 ComponentLibraryIdentifier1=ADLib.DbLib/Дроссели SMT - Синфазные фильтры
@@ -1280,7 +1340,7 @@ ComponentLibIdentifierKind14=Library Name And Type
 ComponentLibraryIdentifier14=ADLib.DbLib/МС - Логические элементы
 ComponentDesignItemID14=SN74LVC125APWR
 ComponentSymbolReference14=SN74LVC125APW
-ComponentUpdate14=1
+ComponentUpdate14=0
 ComponentIsDeviceSheet14=0
 ComponentLibIdentifierKind15=Library Name And Type
 ComponentLibraryIdentifier15=ADLib.DbLib/МС - Согласователи уровней
@@ -1362,29 +1422,35 @@ ComponentUpdate27=0
 ComponentIsDeviceSheet27=0
 ComponentLibIdentifierKind28=Library Name And Type
 ComponentLibraryIdentifier28=ADLib.DbLib/Светодиоды SMT - Общ
-ComponentDesignItemID28=KPHHS-1005CGCK
+ComponentDesignItemID28=NCD0603G1
 ComponentSymbolReference28=Led-1
 ComponentUpdate28=0
 ComponentIsDeviceSheet28=0
 ComponentLibIdentifierKind29=Library Name And Type
-ComponentLibraryIdentifier29=ADLib.DbLib/Соединители Электрические - USB
-ComponentDesignItemID29=U262-161N-4BVC11
-ComponentSymbolReference29=Con-USB_C-F-16P
+ComponentLibraryIdentifier29=ADLib.DbLib/Светодиоды SMT - Общ
+ComponentDesignItemID29=NCD0603W1
+ComponentSymbolReference29=Led-1
 ComponentUpdate29=0
 ComponentIsDeviceSheet29=0
 ComponentLibIdentifierKind30=Library Name And Type
-ComponentLibraryIdentifier30=ADLib.DbLib/Соединители Электрические - Клеммники
-ComponentDesignItemID30=ECH381R-04P
-ComponentSymbolReference30=Con-4-T
+ComponentLibraryIdentifier30=ADLib.DbLib/Соединители Электрические - USB
+ComponentDesignItemID30=U262-161N-4BVC11
+ComponentSymbolReference30=Con-USB_C-F-16P
 ComponentUpdate30=0
 ComponentIsDeviceSheet30=0
 ComponentLibIdentifierKind31=Library Name And Type
-ComponentLibraryIdentifier31=ADLib.DbLib/Соединители Электрические - Межплатные
-ComponentDesignItemID31=PLS-5
-ComponentSymbolReference31=Con-5-M
+ComponentLibraryIdentifier31=ADLib.DbLib/Соединители Электрические - Клеммники
+ComponentDesignItemID31=ECH381R-04P
+ComponentSymbolReference31=Con-4-T
 ComponentUpdate31=0
 ComponentIsDeviceSheet31=0
-FullReplace=0
+ComponentLibIdentifierKind32=Library Name And Type
+ComponentLibraryIdentifier32=ADLib.DbLib/Соединители Электрические - Межплатные
+ComponentDesignItemID32=PLS-5
+ComponentSymbolReference32=Con-5-M
+ComponentUpdate32=0
+ComponentIsDeviceSheet32=0
+FullReplace=1
 UpdateDesignatorLock=0
 UpdatePartIDLock=0
 PreserveParameterLocations=1
@@ -1605,10 +1671,10 @@ ModelType12=PCBLIB
 ModelName12=IT-1185AP
 ModelUpdate12=1
 ModelType13=PCBLIB
-ModelName13=LD0402
+ModelName13=LD0603
 ModelUpdate13=1
 ModelType14=PCBLIB
-ModelName14=LD0402_L
+ModelName14=LD0603_L
 ModelUpdate14=1
 ModelType15=PCBLIB
 ModelName15=LFCSP-12_050P300X300X080_N
@@ -1647,7 +1713,7 @@ ModelType26=PCBLIB
 ModelName26=SOT-23-6_095P290X160X145_N
 ModelUpdate26=1
 ModelType27=PCBLIB
-ModelName27=TSSOP-16_065P500X440X120_N
+ModelName27=TSSOP-14_065P500X440X120_N
 ModelUpdate27=1
 ModelType28=PCBLIB
 ModelName28=TSSOP-20_065P650X440X120_N
