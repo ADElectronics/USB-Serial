@@ -1,5 +1,7 @@
 # Build
 /build/*
+!/build/*.bin
+!/build/*.hex
 
 # Sources
 /Drivers/*
