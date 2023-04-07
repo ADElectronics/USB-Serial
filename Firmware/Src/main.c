@@ -41,12 +41,16 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+#define INTERFACE_RS232_ENABLE                  1
+
 typedef enum
 {
    INTRF_USART = 0,
-   INTRF_RS485 = 1,
-   INTRF_RS422 = 2,
-   INTRF_RS232 = 3
+   INTRF_RS485,
+   INTRF_RS422,
+#if(INTERFACE_RS232_ENABLE)
+   INTRF_RS232
+#endif
 } interface_t;
 
 
@@ -56,26 +60,18 @@ static uint8_t buf_rx[UART_BUF_LEN];
 
 void NewDataReceived()
 {
-   static uint32_t position_pr = 0;
-   static uint32_t position_dma = 0;
-   position_dma = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_5);
-   uint32_t position = UART_BUF_LEN - position_dma;
-   static uint32_t data_len = 0x00;
-
-   if (position < position_pr)
-   {
-      data_len = (UART_BUF_LEN - position_pr) + position;
-   }
-   else
-   {
-      data_len = position - position_pr;
-   }
+   uint32_t position_dma = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_5);
+   uint32_t data_len = UART_BUF_LEN - position_dma;
 
    if (data_len > 0 && data_len < UART_BUF_LEN)
    {
+      LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_5);
       CDC_Transmit_FS(&buf_rx[0], data_len);
-      LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, 0);
    }
+
+   LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
+   LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, UART_BUF_LEN);
+   LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
 }
 
 void NewDataTransmit(uint8_t *data, uint32_t len)
@@ -106,6 +102,7 @@ void SetInterface(interface_t i)
          LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_1);
          break;
 
+#if(INTERFACE_RS232_ENABLE)
       case INTRF_RS232:
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_0);
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_4);
@@ -114,6 +111,7 @@ void SetInterface(interface_t i)
          LL_GPIO_SetPinMode(GPIOA, GPIO_PIN_1, LL_GPIO_MODE_OUTPUT);
          LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_1);
          break;
+#endif
 
       default: // INTRF_USART
          LL_GPIO_SetOutputPin(GPIOA, GPIO_PIN_0);
@@ -168,14 +166,12 @@ int main(void)
    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
 
    // TX
-   //LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_4, (uint32_t)&buf_rx, (uint32_t)&USART2->TDR, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
    LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_4, (uint32_t)&USART2->TDR);
    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_4);
    //LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
 
    LL_USART_EnableDMAReq_RX(USART2);
    LL_USART_EnableDMAReq_TX(USART2);
-   //LL_USART_EnableIT_RXNE(USART2);
    LL_USART_EnableIT_IDLE(USART2);
    LL_USART_Enable(USART2);
   /* USER CODE END 2 */
@@ -196,7 +192,11 @@ int main(void)
          if (count > 50)
          {
             current_int += 1;
+#if(INTERFACE_RS232_ENABLE)
             if (current_int > INTRF_RS232)
+#else
+            if (current_int > INTRF_RS422)
+#endif
             {
                current_int = INTRF_USART;
             }
@@ -204,6 +204,12 @@ int main(void)
             SetInterface(current_int);
             HAL_Delay(200);
          }
+      }
+
+      if (LL_GPIO_IsOutputPinSet(GPIOA, GPIO_PIN_5))
+      {
+         HAL_Delay(20);
+         LL_GPIO_ResetOutputPin(GPIOA, GPIO_PIN_5);
       }
     /* USER CODE END WHILE */
 

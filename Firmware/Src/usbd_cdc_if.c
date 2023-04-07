@@ -312,7 +312,10 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-   NewDataTransmit(Buf, *Len);
+   uint32_t len = *Len;
+   NewDataTransmit(&Buf[0], len);
+   while (!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_4)) ;//HAL_Delay(1);
+
    USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
    USBD_CDC_ReceivePacket(&hUsbDeviceFS);
    return (USBD_OK);
